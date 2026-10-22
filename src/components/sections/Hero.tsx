@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import Image from "next/image";
 import { ArrowDown, Download, MessageSquare, Sparkles, Terminal } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/Icons";
 import { profile } from "@/data/profile";
@@ -127,42 +126,22 @@ export function Hero() {
             </div>
           </div>
 
-          {/* Right Column: 3D Scene + Real Profile Portrait Overlay */}
+          {/* Right Column: 3D Rotating Circular Portrait */}
           <div className="lg:col-span-5 relative flex items-center justify-center">
-            {/* 3D WebGL Neural Scene */}
-            <div className="w-full aspect-square max-w-[480px] relative">
+            <div className="w-full aspect-square max-w-[500px] relative flex items-center justify-center">
+              {/* 3D WebGL Rotating Photo Medal */}
               <HeroScene />
 
-              {/* Floating Real Portrait Badge Card */}
-              <div className="absolute -bottom-4 -left-4 sm:bottom-2 sm:left-0 z-20 glass-panel p-3.5 rounded-2xl flex items-center gap-3.5 border-cyan-500/30 shadow-[0_10px_35px_rgba(0,0,0,0.8)] backdrop-blur-xl animate-fade-in hover:border-cyan-400/60 transition-all">
-                <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-xl overflow-hidden border border-cyan-400/50 flex-shrink-0 shadow-[0_0_15px_rgba(56,189,248,0.3)]">
-                  <Image
-                    src={profile.avatarUrl}
-                    alt="Portrait professionnel de Moussa Diakité"
-                    fill
-                    sizes="(max-width: 640px) 64px, 72px"
-                    className="object-cover object-top"
-                    priority
-                  />
-                </div>
-                <div className="flex flex-col">
-                  <div className="flex items-center gap-1.5">
-                    <span className="font-bold text-white text-sm">
-                      {profile.name}
-                    </span>
-                    <span className="w-2 h-2 rounded-full bg-emerald-400" title="Disponible pour stage PFE" />
-                  </div>
-                  <span className="text-xs text-cyan-300 font-mono">
-                    AI Software Engineer
-                  </span>
-                  <span className="text-[11px] text-slate-400 mt-0.5">
-                    Mundiapolis • Casablanca
-                  </span>
-                </div>
+              {/* Status Badge Bottom */}
+              <div className="absolute -bottom-2 sm:bottom-4 z-20 glass-panel px-4 py-2 rounded-full flex items-center gap-2.5 border-cyan-500/30 shadow-[0_10px_35px_rgba(0,0,0,0.8)] backdrop-blur-xl">
+                <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-xs font-mono font-semibold text-slate-200">
+                  Moussa Diakité • En recherche de PFE
+                </span>
               </div>
 
               {/* Floating Tag Top Right */}
-              <div className="absolute top-4 right-0 z-20 glass-panel px-3.5 py-1.5 rounded-full flex items-center gap-2 border-purple-500/30 shadow-[0_4px_20px_rgba(139,92,246,0.25)] text-xs text-purple-300 font-mono">
+              <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-20 glass-panel px-3.5 py-1.5 rounded-full flex items-center gap-2 border-purple-500/30 shadow-[0_4px_20px_rgba(139,92,246,0.25)] text-xs text-purple-300 font-mono">
                 <span className="w-2 h-2 rounded-full bg-purple-400 animate-pulse" />
                 <span>RAG • Agents • LLM</span>
               </div>

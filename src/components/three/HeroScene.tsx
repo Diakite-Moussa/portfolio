@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import Image from "next/image";
 
 export default function HeroScene() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -32,8 +33,8 @@ export default function HeroScene() {
       return;
     }
 
-    const width = container.clientWidth || 400;
-    const height = container.clientHeight || 400;
+    const width = container.clientWidth || 440;
+    const height = container.clientHeight || 440;
 
     renderer.setSize(width, height);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -41,76 +42,177 @@ export default function HeroScene() {
     container.appendChild(renderer.domElement);
 
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 1000);
-    camera.position.z = 22;
+    const camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 1000);
+    camera.position.z = 18;
 
-    // Neural Network / Icosahedron Core Group
-    const group = new THREE.Group();
-    scene.add(group);
+    // Lights
+    const ambientLight = new THREE.AmbientLight(0xffffff, 1.8);
+    scene.add(ambientLight);
 
-    // 1. Outer Particle Network (Neural Cloud)
-    const particleCount = 200;
-    const geometry = new THREE.BufferGeometry();
-    const positions = new Float32Array(particleCount * 3);
-    const colors = new Float32Array(particleCount * 3);
+    const pointLightCyan = new THREE.PointLight(0x38bdf8, 3.5, 40);
+    pointLightCyan.position.set(10, 8, 12);
+    scene.add(pointLightCyan);
 
-    const cyanColor = new THREE.Color(0x38bdf8);
-    const purpleColor = new THREE.Color(0x8b5cf6);
+    const pointLightPurple = new THREE.PointLight(0xa855f7, 3.0, 40);
+    pointLightPurple.position.set(-10, -6, 10);
+    scene.add(pointLightPurple);
+
+    const backLight = new THREE.DirectionalLight(0xffffff, 1.2);
+    backLight.position.set(0, 5, -10);
+    scene.add(backLight);
+
+    // Master Group that tilts with mouse
+    const masterGroup = new THREE.Group();
+    scene.add(masterGroup);
+
+    // Rotating Core Group
+    const coinGroup = new THREE.Group();
+    masterGroup.add(coinGroup);
+
+    // Load Portrait Texture
+    const textureLoader = new THREE.TextureLoader();
+    const portraitTexture = textureLoader.load(
+      "/images/profile/moussa-diakite.png",
+      (tex) => {
+        tex.colorSpace = THREE.SRGBColorSpace;
+        tex.center.set(0.5, 0.5);
+      }
+    );
+
+    // 1. Double-Sided Circular 3D Disc (Front & Back Face)
+    const discRadius = 4.8;
+    const discThickness = 0.28;
+
+    // Front Face (Photo)
+    const frontGeom = new THREE.CircleGeometry(discRadius, 64);
+    const frontMat = new THREE.MeshStandardMaterial({
+      map: portraitTexture,
+      roughness: 0.35,
+      metalness: 0.1,
+      side: THREE.FrontSide,
+    });
+    const frontMesh = new THREE.Mesh(frontGeom, frontMat);
+    frontMesh.position.z = discThickness / 2 + 0.01;
+    coinGroup.add(frontMesh);
+
+    // Back Face (Photo flipped so it looks natural on both sides)
+    const backTexture = portraitTexture.clone();
+    backTexture.wrapS = THREE.RepeatWrapping;
+    backTexture.repeat.x = -1; // Mirror horizontally so orientation is correct from behind
+    const backGeom = new THREE.CircleGeometry(discRadius, 64);
+    const backMat = new THREE.MeshStandardMaterial({
+      map: backTexture,
+      roughness: 0.35,
+      metalness: 0.1,
+      side: THREE.BackSide,
+    });
+    const backMesh = new THREE.Mesh(backGeom, backMat);
+    backMesh.position.z = -discThickness / 2 - 0.01;
+    coinGroup.add(backMesh);
+
+    // Metallic Beveled Edge / Outer Ring Frame
+    const frameGeom = new THREE.CylinderGeometry(
+      discRadius + 0.08,
+      discRadius + 0.08,
+      discThickness,
+      64,
+      1,
+      true
+    );
+    const frameMat = new THREE.MeshStandardMaterial({
+      color: 0x1e293b,
+      roughness: 0.25,
+      metalness: 0.85,
+    });
+    const frameMesh = new THREE.Mesh(frameGeom, frameMat);
+    frameMesh.rotation.x = Math.PI / 2;
+    coinGroup.add(frameMesh);
+
+    // Front Glowing Bezel Border (Cyan Neon Ring)
+    const bezelGeom = new THREE.TorusGeometry(discRadius + 0.08, 0.09, 16, 100);
+    const bezelMat = new THREE.MeshStandardMaterial({
+      color: 0x38bdf8,
+      emissive: 0x0284c7,
+      emissiveIntensity: 0.8,
+      roughness: 0.2,
+      metalness: 0.8,
+    });
+    const frontBezel = new THREE.Mesh(bezelGeom, bezelMat);
+    frontBezel.position.z = discThickness / 2;
+    coinGroup.add(frontBezel);
+
+    const backBezel = new THREE.Mesh(bezelGeom, bezelMat);
+    backBezel.position.z = -discThickness / 2;
+    coinGroup.add(backBezel);
+
+    // 2. Futuristic Orbital Rings
+    const ringGroup = new THREE.Group();
+    masterGroup.add(ringGroup);
+
+    // Inner Gyroscopic Ring (Cyan)
+    const innerRingGeom = new THREE.TorusGeometry(5.6, 0.035, 16, 120);
+    const innerRingMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
+      transparent: true,
+      opacity: 0.65,
+    });
+    const innerRing = new THREE.Mesh(innerRingGeom, innerRingMat);
+    ringGroup.add(innerRing);
+
+    // Outer Gyroscopic Ring (Violet Neon)
+    const outerRingGeom = new THREE.TorusGeometry(6.4, 0.045, 16, 120);
+    const outerRingMat = new THREE.MeshBasicMaterial({
+      color: 0xa855f7,
+      transparent: true,
+      opacity: 0.75,
+    });
+    const outerRing = new THREE.Mesh(outerRingGeom, outerRingMat);
+    outerRing.rotation.x = Math.PI / 4;
+    ringGroup.add(outerRing);
+
+    // 3. Floating Orbiting Cyber Particles
+    const particleCount = 140;
+    const particleGeom = new THREE.BufferGeometry();
+    const particlePositions = new Float32Array(particleCount * 3);
+    const particleColors = new Float32Array(particleCount * 3);
+
+    const colorCyan = new THREE.Color(0x38bdf8);
+    const colorPurple = new THREE.Color(0xa855f7);
 
     for (let i = 0; i < particleCount; i++) {
-      const radius = 6.5 + Math.random() * 3.5;
+      const radius = 5.2 + Math.random() * 3.2;
       const theta = Math.random() * Math.PI * 2;
       const phi = Math.acos(Math.random() * 2 - 1);
 
-      const x = radius * Math.sin(phi) * Math.cos(theta);
-      const y = radius * Math.sin(phi) * Math.sin(theta);
-      const z = radius * Math.cos(phi);
+      particlePositions[i * 3] = radius * Math.sin(phi) * Math.cos(theta);
+      particlePositions[i * 3 + 1] = radius * Math.sin(phi) * Math.sin(theta);
+      particlePositions[i * 3 + 2] = radius * Math.cos(phi);
 
-      positions[i * 3] = x;
-      positions[i * 3 + 1] = y;
-      positions[i * 3 + 2] = z;
-
-      const mixed = cyanColor.clone().lerp(purpleColor, Math.random());
-      colors[i * 3] = mixed.r;
-      colors[i * 3 + 1] = mixed.g;
-      colors[i * 3 + 2] = mixed.b;
+      const mixed = colorCyan.clone().lerp(colorPurple, Math.random());
+      particleColors[i * 3] = mixed.r;
+      particleColors[i * 3 + 1] = mixed.g;
+      particleColors[i * 3 + 2] = mixed.b;
     }
 
-    geometry.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-    geometry.setAttribute("color", new THREE.BufferAttribute(colors, 3));
+    particleGeom.setAttribute(
+      "position",
+      new THREE.BufferAttribute(particlePositions, 3)
+    );
+    particleGeom.setAttribute(
+      "color",
+      new THREE.BufferAttribute(particleColors, 3)
+    );
 
-    const particleMaterial = new THREE.PointsMaterial({
-      size: 0.28,
+    const particleMat = new THREE.PointsMaterial({
+      size: 0.18,
       vertexColors: true,
       transparent: true,
-      opacity: 0.85,
+      opacity: 0.8,
       blending: THREE.AdditiveBlending,
     });
 
-    const particles = new THREE.Points(geometry, particleMaterial);
-    group.add(particles);
-
-    // 2. Inner Neural Geometric Core (Icosahedron Wireframe)
-    const innerGeom = new THREE.IcosahedronGeometry(5.2, 1);
-    const innerMat = new THREE.MeshBasicMaterial({
-      color: 0x38bdf8,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.22,
-    });
-    const innerMesh = new THREE.Mesh(innerGeom, innerMat);
-    group.add(innerMesh);
-
-    // 3. Central Glowing Pulsing Core
-    const coreGeom = new THREE.SphereGeometry(2.4, 24, 24);
-    const coreMat = new THREE.MeshBasicMaterial({
-      color: 0x8b5cf6,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.35,
-    });
-    const coreMesh = new THREE.Mesh(coreGeom, coreMat);
-    group.add(coreMesh);
+    const particles = new THREE.Points(particleGeom, particleMat);
+    masterGroup.add(particles);
 
     // Mouse Interaction
     let mouseX = 0;
@@ -122,13 +224,13 @@ export default function HeroScene() {
       const rect = container.getBoundingClientRect();
       const x = (e.clientX - rect.left) / rect.width - 0.5;
       const y = (e.clientY - rect.top) / rect.height - 0.5;
-      targetX = x * 1.5;
-      targetY = y * 1.5;
+      targetX = x * 0.8;
+      targetY = y * 0.8;
     };
 
     window.addEventListener("mousemove", handleMouseMove);
 
-    // Handle Resize
+    // Resize Handling
     const handleResize = () => {
       if (!container) return;
       const newWidth = container.clientWidth;
@@ -142,26 +244,33 @@ export default function HeroScene() {
 
     // Animation Loop
     let animationFrameId: number;
-    let clock = new THREE.Clock();
+    const clock = new THREE.Clock();
 
     const animate = () => {
       animationFrameId = requestAnimationFrame(animate);
-
       const elapsedTime = clock.getElapsedTime();
 
-      // Smooth mouse follow
+      // Smooth mouse follow (Parallax Tilt)
       mouseX += (targetX - mouseX) * 0.05;
       mouseY += (targetY - mouseY) * 0.05;
 
-      group.rotation.y = elapsedTime * 0.15 + mouseX;
-      group.rotation.x = elapsedTime * 0.08 + mouseY;
+      masterGroup.rotation.y = mouseX;
+      masterGroup.rotation.x = mouseY;
 
-      innerMesh.rotation.y = -elapsedTime * 0.1;
-      coreMesh.rotation.z = elapsedTime * 0.2;
+      // Continuous 360° rotation for the photo coin
+      coinGroup.rotation.y = elapsedTime * 0.55;
 
-      // Pulse scaling
-      const scale = 1 + Math.sin(elapsedTime * 1.8) * 0.05;
-      coreMesh.scale.set(scale, scale, scale);
+      // Gentle floating levitation
+      coinGroup.position.y = Math.sin(elapsedTime * 1.6) * 0.22;
+
+      // Counter-rotating gyroscopic rings
+      innerRing.rotation.z = elapsedTime * 0.35;
+      innerRing.rotation.x = Math.sin(elapsedTime * 0.5) * 0.4;
+      outerRing.rotation.y = -elapsedTime * 0.45;
+      outerRing.rotation.z = Math.cos(elapsedTime * 0.6) * 0.3;
+
+      // Slowly rotate particle field
+      particles.rotation.y = elapsedTime * 0.12;
 
       renderer.render(scene, camera);
     };
@@ -176,26 +285,39 @@ export default function HeroScene() {
         container.removeChild(renderer.domElement);
       }
       renderer.dispose();
-      geometry.dispose();
-      innerGeom.dispose();
-      coreGeom.dispose();
-      particleMaterial.dispose();
-      innerMat.dispose();
-      coreMat.dispose();
+      frontGeom.dispose();
+      frontMat.dispose();
+      backGeom.dispose();
+      backMat.dispose();
+      frameGeom.dispose();
+      frameMat.dispose();
+      bezelGeom.dispose();
+      bezelMat.dispose();
+      innerRingGeom.dispose();
+      innerRingMat.dispose();
+      outerRingGeom.dispose();
+      outerRingMat.dispose();
+      particleGeom.dispose();
+      particleMat.dispose();
+      portraitTexture.dispose();
+      backTexture.dispose();
     };
   }, []);
 
   if (!hasWebGL || reducedMotion) {
     return (
-      <div className="w-full h-full min-h-[360px] flex items-center justify-center relative">
-        <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-cyan-500/20 via-purple-600/20 to-transparent blur-3xl opacity-60" />
-        <div className="relative w-64 h-64 rounded-full border border-cyan-400/30 flex items-center justify-center p-8 backdrop-blur-md bg-slate-900/40">
-          <div className="w-48 h-48 rounded-full border border-dashed border-purple-500/40 flex items-center justify-center">
-            <div className="w-32 h-32 rounded-full bg-gradient-to-tr from-cyan-400/20 to-purple-500/30 flex items-center justify-center border border-cyan-300/40 shadow-[0_0_30px_rgba(56,189,248,0.25)]">
-              <span className="text-xs uppercase tracking-widest text-cyan-300 font-semibold text-center">
-                Neural Core<br />AI System
-              </span>
-            </div>
+      <div className="w-full h-full min-h-[380px] lg:min-h-[460px] flex items-center justify-center relative">
+        <div className="absolute inset-0 rounded-full bg-gradient-to-tr from-cyan-500/20 via-purple-600/20 to-transparent blur-3xl opacity-70" />
+        <div className="relative w-64 h-64 sm:w-80 sm:h-80 rounded-full p-2 bg-gradient-to-tr from-cyan-500 via-blue-500 to-purple-600 shadow-[0_0_50px_rgba(56,189,248,0.4)]">
+          <div className="w-full h-full rounded-full overflow-hidden relative border-2 border-slate-950">
+            <Image
+              src="/images/profile/moussa-diakite.png"
+              alt="Portrait professionnel 3D de Moussa Diakité"
+              fill
+              sizes="320px"
+              className="object-cover object-top"
+              priority
+            />
           </div>
         </div>
       </div>
@@ -205,8 +327,8 @@ export default function HeroScene() {
   return (
     <div
       ref={containerRef}
-      className="w-full h-full min-h-[380px] lg:min-h-[460px] flex items-center justify-center relative"
-      aria-label="Visualisation 3D interactive d'un réseau neuronal artificiel"
+      className="w-full h-full min-h-[380px] lg:min-h-[500px] flex items-center justify-center relative select-none"
+      aria-label="Portrait professionnel 3D circulaire interactif de Moussa Diakité"
     />
   );
 }
