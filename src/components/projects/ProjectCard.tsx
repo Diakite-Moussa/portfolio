@@ -11,13 +11,6 @@ interface ProjectCardProps {
 }
 
 export function ProjectCard({ project }: ProjectCardProps) {
-  const statusVariantMap: Record<Project["statusColor"], "blue" | "purple" | "emerald" | "amber"> = {
-    blue: "blue",
-    purple: "purple",
-    emerald: "emerald",
-    amber: "amber",
-  };
-
   const badgeVariant =
     project.statusColor === "blue"
       ? "cyan"
@@ -119,6 +112,7 @@ export function ProjectCard({ project }: ProjectCardProps) {
               target="_blank"
               rel="noopener noreferrer"
               aria-label={`Code source GitHub de ${project.title}`}
+              title={`Voir le code source de ${project.title} sur GitHub`}
               className="p-2 rounded-lg bg-slate-900 hover:bg-slate-800 text-slate-400 hover:text-white border border-slate-800 transition-colors"
             >
               <GithubIcon className="w-4 h-4" />

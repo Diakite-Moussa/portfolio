@@ -1,21 +1,45 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import * as THREE from "three";
 import Image from "next/image";
 
+function subscribeReducedMotion(callback: () => void) {
+  if (typeof window === "undefined") return () => {};
+  const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
+  mediaQuery.addEventListener("change", callback);
+  return () => mediaQuery.removeEventListener("change", callback);
+}
+
+function getReducedMotionSnapshot() {
+  if (typeof window === "undefined") return false;
+  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+}
+
+function checkWebGLSupport(): boolean {
+  if (typeof window === "undefined") return true;
+  try {
+    const canvas = document.createElement("canvas");
+    return Boolean(
+      window.WebGLRenderingContext &&
+        (canvas.getContext("webgl") || canvas.getContext("experimental-webgl"))
+    );
+  } catch {
+    return false;
+  }
+}
+
 export default function HeroScene() {
   const containerRef = useRef<HTMLDivElement>(null);
-  const [hasWebGL, setHasWebGL] = useState<boolean>(true);
-  const [reducedMotion, setReducedMotion] = useState<boolean>(false);
+  const [hasWebGL] = useState<boolean>(checkWebGLSupport);
+  const reducedMotion = useSyncExternalStore(
+    subscribeReducedMotion,
+    getReducedMotionSnapshot,
+    () => false
+  );
 
   useEffect(() => {
-    // Check prefers-reduced-motion
-    const mediaQuery = window.matchMedia("(prefers-reduced-motion: reduce)");
-    if (mediaQuery.matches) {
-      setReducedMotion(true);
-      return;
-    }
+    if (reducedMotion || !hasWebGL) return;
 
     const container = containerRef.current;
     if (!container) return;
@@ -29,7 +53,6 @@ export default function HeroScene() {
         powerPreference: "high-performance",
       });
     } catch {
-      setHasWebGL(false);
       return;
     }
 
@@ -302,7 +325,7 @@ export default function HeroScene() {
       portraitTexture.dispose();
       backTexture.dispose();
     };
-  }, []);
+  }, [reducedMotion, hasWebGL]);
 
   if (!hasWebGL || reducedMotion) {
     return (

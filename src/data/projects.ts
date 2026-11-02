@@ -57,7 +57,7 @@ export const projects: Project[] = [
       "Optimisation du temps de traitement par document sur infrastructure contrainte",
     ],
     image: "/images/projects/docuflow.jpg",
-    githubUrl: "https://github.com/Diakite-Moussa",
+    githubUrl: "https://github.com/Diakite-Moussa/docuflow-ai",
     metrics: [
       { label: "Domaine", value: "Doc AI" },
       { label: "Format cible", value: "JSON Strict" },
@@ -190,7 +190,7 @@ export const projects: Project[] = [
       "Fiabilité absolue sur la confirmation vocale des montants financiers",
     ],
     image: "/images/projects/suguai.jpg",
-    githubUrl: "https://github.com/Diakite-Moussa",
+    githubUrl: "https://github.com/Diakite-Moussa/sugu_ai_mobile",
     metrics: [
       { label: "Slogan", value: "Parle, Vends, Grandis" },
       { label: "Priorité", value: "Voice-First UX" },

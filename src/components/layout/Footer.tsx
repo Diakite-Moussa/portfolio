@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { Mail, MessageSquare, ArrowUp, Heart } from "lucide-react";
+import { Mail, MessageSquare, ArrowUp } from "lucide-react";
 import { GithubIcon, LinkedinIcon } from "@/components/ui/Icons";
 import { profile } from "@/data/profile";
 
@@ -29,8 +29,8 @@ export function Footer() {
               </span>
             </div>
             <p className="text-slate-400 text-sm max-w-md leading-relaxed">
-              Étudiant ingénieur en informatique (Data Science & IA) à l'Université Mundiapolis, Casablanca.
-              Conception d'architectures intelligentes alliant LLM, agents autonomes et développement logiciel de production.
+              Étudiant ingénieur en informatique (Data Science & IA) à l&apos;Université Mundiapolis, Casablanca.
+              Conception d&apos;architectures intelligentes alliant LLM, agents autonomes et développement logiciel de production.
             </p>
             <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-950/40 border border-emerald-500/30 text-emerald-400 text-xs">
               <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />

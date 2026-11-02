@@ -15,7 +15,7 @@ import {
   Target,
 } from "lucide-react";
 import { GithubIcon } from "@/components/ui/Icons";
-import { projects, Project } from "@/data/projects";
+import { projects } from "@/data/projects";
 import { profile } from "@/data/profile";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
